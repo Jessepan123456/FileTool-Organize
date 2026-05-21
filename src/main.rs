@@ -1,20 +1,19 @@
 use std::collections::HashMap;
-use std::fs::{create_dir, create_dir_all, read_dir, rename};
+use std::fs::{create_dir_all, read_dir, rename};
 use std::io::{Error, stdin};
 use std::path::{Path, PathBuf};
 
 fn main() -> Result<(), Error> {
     loop {
-        let mut user_folder = String::new();
-        let mut user_option = String::new();
+        let mut user_scan_folder = String::new();
 
         //Safety Feature for when it fails to find the folder or scan it
         println!("Enter a folder path you want to scan: ");
-        stdin().read_line(&mut user_folder).expect("Invalid");
-        let user_folder = user_folder.trim();
+        stdin().read_line(&mut user_scan_folder).expect("Invalid");
+        let user_scan_folder = user_scan_folder.trim();
 
         //Folder Path Start
-        let folder_path = Path::new(user_folder);
+        let folder_path = Path::new(user_scan_folder);
         let mut file_groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
 
         //Opens the Folder and explore what in it
@@ -27,7 +26,7 @@ fn main() -> Result<(), Error> {
                     //Print it out with it path
                     if path.is_file() {
                         println!("Found File: {:?}", path);
-                        files(path, &mut file_groups);
+                        files_grouping(path, &mut file_groups);
                     } else {
                         //Do Something with the folders IDK What yet
                         println!("Found Folder: {:?}", path)
@@ -40,16 +39,14 @@ fn main() -> Result<(), Error> {
             }
         }
 
-        println!("Type N if it the wrong Folder, Otherwise Type Anything: ");
-        stdin().read_line(&mut user_option).expect("Invalid Input");
-        let user_option = user_option.trim();
-        if user_option == "N" {
+        if stop() == false {
             continue;
         } else {
             break;
         }
     }
     //Make it possible for those folder to be create on the desire location
+
     create_folders()?;
 
     // // 2. Build new file path
@@ -65,9 +62,20 @@ fn main() -> Result<(), Error> {
     // for (key, value) in &file_groups {
     //     println!("{}: {:?}", key, value);
     // }
-
-    create_folders()?;
     Ok(())
+}
+
+//Helper Method for Stopping the scan or not
+fn stop() -> bool {
+    let mut user_option = String::new();
+    println!("Type N if it the wrong Folder, Otherwise Type Anything: ");
+    stdin().read_line(&mut user_option).expect("Invalid Input");
+    let user_option = user_option.trim();
+    if user_option == "N" {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 //Helper Method for determining File Types
@@ -84,7 +92,7 @@ fn file_type(types: &str) -> &str {
 }
 
 //Helper Method for Grouping Files Types
-fn files(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
+fn files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
     if let Some(types) = path.extension().and_then(|e| e.to_str()) {
         groups
             .entry(file_type(types).to_string())
@@ -95,17 +103,30 @@ fn files(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
 
 //Helper Method for Creating all the needed Folders
 fn create_folders() -> Result<(), Error> {
-    create_dir_all("../../../Images")?;
-    create_dir_all("../../../Videos")?;
-    create_dir_all("../../../Music")?;
-    create_dir_all("../../../Documents")?;
-    create_dir_all("../../../Code")?;
-    create_dir_all("../../../Archives")?;
-    create_dir_all("../../../Unknown")?;
+    println!(
+        "Enter a folder path for these folders(Images, Videos, Music, Documents, Code, Archives, Unknown): "
+    );
+    let mut user_folder_location = String::new();
+    stdin()
+        .read_line(&mut user_folder_location)
+        .expect("Invalid Input");
+    let user_folder_location = user_folder_location.trim();
 
-    // 1. Create target folder
-    // let new_folder = folder_path.join("RustPages");
-    // create_dir(&new_folder)?;
+    let folders = [
+        "Images",
+        "Videos",
+        "Music",
+        "Documetns",
+        "Code",
+        "Archives",
+        "Unknown",
+    ];
+
+    let folder_path = Path::new(&user_folder_location);
+
+    for folder in folders {
+        create_dir_all(folder_path.join(format!("{}", folder)))?;
+    }
 
     Ok(())
 }
