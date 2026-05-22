@@ -4,17 +4,18 @@ use std::io::{Error, stdin};
 use std::path::{Path, PathBuf};
 
 fn main() -> Result<(), Error> {
+    let mut file_groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
+
     loop {
         let mut user_scan_folder = String::new();
 
-        //Safety Feature for when it fails to find the folder or scan it
         println!("Enter a folder path you want to scan: ");
         stdin().read_line(&mut user_scan_folder).expect("Invalid");
         let user_scan_folder = user_scan_folder.trim();
 
         //Folder Path Start
         let folder_path = Path::new(user_scan_folder);
-        let mut file_groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
+        file_groups.clear();
 
         //Opens the Folder and explore what in it
         match read_dir(folder_path) {
@@ -23,7 +24,6 @@ fn main() -> Result<(), Error> {
                     let entry = entry?;
                     let path = entry.path();
 
-                    //Print it out with it path
                     if path.is_file() {
                         println!("Found File: {:?}", path);
                         files_grouping(path, &mut file_groups);
@@ -45,23 +45,13 @@ fn main() -> Result<(), Error> {
             break;
         }
     }
-    //Make it possible for those folder to be create on the desire location
 
-    create_folders()?;
+    let mut user_folder_location = String::new();
+    create_folders(&mut user_folder_location)?;
+    let user_folder_location = user_folder_location.trim();
+    let folder_path = Path::new(&user_folder_location);
 
-    // // 2. Build new file path
-    // //Takes the file name of path
-    // let file_name = path.file_name().unwrap();
-    // //Combine it with new folder that was made
-    // let new_path = new_folder.join(file_name);
-
-    // // 3. Move file
-    // //Move it
-    // rename(&path, &new_path)?;
-
-    // for (key, value) in &file_groups {
-    //     println!("{}: {:?}", key, value);
-    // }
+    move_files(&file_groups, folder_path);
     Ok(())
 }
 
@@ -83,11 +73,11 @@ fn file_type(types: &str) -> &str {
     match types {
         "png" | "jpg" | "jpeg" | "gif" => "Images",
         "mp4" | "mov" => "Videos",
-        "mp3" | "wav" => "Audio",
+        "mp3" | "wav" => "Music",
         "pdf" | "docx" => "Documents",
         "rs" | "js" | "java" => "Code",
         "zip" | "rar" => "Archives",
-        _ => "Other Unknown File",
+        _ => "Unknown",
     }
 }
 
@@ -102,13 +92,12 @@ fn files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
 }
 
 //Helper Method for Creating all the needed Folders
-fn create_folders() -> Result<(), Error> {
+fn create_folders(user_folder_location: &mut String) -> Result<(), Error> {
     println!(
         "Enter a folder path for these folders(Images, Videos, Music, Documents, Code, Archives, Unknown): "
     );
-    let mut user_folder_location = String::new();
     stdin()
-        .read_line(&mut user_folder_location)
+        .read_line(user_folder_location)
         .expect("Invalid Input");
     let user_folder_location = user_folder_location.trim();
 
@@ -116,7 +105,7 @@ fn create_folders() -> Result<(), Error> {
         "Images",
         "Videos",
         "Music",
-        "Documetns",
+        "Documents",
         "Code",
         "Archives",
         "Unknown",
@@ -125,15 +114,28 @@ fn create_folders() -> Result<(), Error> {
     let folder_path = Path::new(&user_folder_location);
 
     for folder in folders {
-        create_dir_all(folder_path.join(format!("{}", folder)))?;
+        create_dir_all(folder_path.join(folder))?;
     }
 
     Ok(())
 }
 
-// 1. Read Folder
-// 2. Scan files
-// 3. Detect File Type
-// 4. Group Files by Type
-// 5. Create Folders or if it already exist
-// 6. Move to Folder
+//Helper method for moving all files into it own group
+fn move_files(file_groups: &HashMap<String, Vec<PathBuf>>, path: &Path) {
+    for (key, files) in file_groups {
+        for file in files {
+            let file_name = match file.file_name() {
+                Some(name) => name,
+                None => {
+                    println!("Could not get file");
+                    continue;
+                }
+            };
+            let new_path = path.join(key).join(file_name);
+
+            if let Err(e) = rename(file, new_path) {
+                println!("Failed to move file: {}", e)
+            }
+        }
+    }
+}
