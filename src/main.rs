@@ -28,7 +28,6 @@ fn main() -> Result<(), Error> {
                         println!("Found File: {:?}", path);
                         files_grouping(path, &mut file_groups);
                     } else {
-                        //Do Something with the folders IDK What yet
                         println!("Found Folder: {:?}", path)
                     }
                 }
