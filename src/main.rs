@@ -7,10 +7,8 @@ fn main() -> Result<(), Error> {
     let mut file_groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
 
     loop {
-        let mut user_scan_folder = String::new();
-
         println!("Enter a folder path you want to scan: ");
-        stdin().read_line(&mut user_scan_folder).expect("Invalid");
+        let user_scan_folder = user_input();
         let user_scan_folder = user_scan_folder.trim();
 
         //Folder Path Start
@@ -38,7 +36,7 @@ fn main() -> Result<(), Error> {
             }
         }
 
-        if stop() == false {
+        if confirm() == false {
             continue;
         } else {
             break;
@@ -50,15 +48,38 @@ fn main() -> Result<(), Error> {
     let user_folder_location = user_folder_location.trim();
     let folder_path = Path::new(&user_folder_location);
 
-    move_files(&file_groups, folder_path);
+    summary(&file_groups, folder_path);
+    if confirm() == false {
+        return Ok(());
+    } else {
+        move_files(&file_groups, folder_path);
+    }
+
     Ok(())
 }
 
-//Helper Method for Stopping the scan or not
-fn stop() -> bool {
-    let mut user_option = String::new();
-    println!("Type N if it the wrong Folder, Otherwise Type Anything: ");
-    stdin().read_line(&mut user_option).expect("Invalid Input");
+// --- Helper Method ---
+
+//getting user input
+fn user_input() -> String {
+    let mut input = String::new();
+    stdin().read_line(&mut input).expect("Invalid Input");
+    return input;
+}
+
+//Summary of files moved
+fn summary(file_groups: &HashMap<String, Vec<PathBuf>>, location: &Path) {
+    println!("Summary");
+    for (key, files) in file_groups {
+        println!("{}: {}", key, files.len())
+    }
+    println!("Move To: {}", &location.display());
+}
+
+//Stopping the scan or continue
+fn confirm() -> bool {
+    println!("Type N if it the wrong Folder/location, Otherwise Type Anything: ");
+    let user_option = user_input();
     let user_option = user_option.trim();
     if user_option == "N" {
         return false;
@@ -67,20 +88,20 @@ fn stop() -> bool {
     }
 }
 
-//Helper Method for determining File Types
+//determining File Types
 fn file_type(types: &str) -> &str {
     match types {
         "png" | "jpg" | "jpeg" | "gif" => "Images",
-        "mp4" | "mov" => "Videos",
-        "mp3" | "wav" => "Music",
-        "pdf" | "docx" => "Documents",
-        "rs" | "js" | "java" => "Code",
-        "zip" | "rar" => "Archives",
+        "mp4" | "mov" | "avi" | "mkv" | "wmv" | "flv" => "Videos",
+        "mp3" | "wav" | "m4a" | "flac" => "Music",
+        "pdf" | "docx" | "txt" | "rtf" | "ppt" | "pptx" | "csv" | "dpc" => "Documents",
+        "rs" | "js" | "java" | "html" | "css" | "ts" | "py" | "htm" | "json" => "Code",
+        "zip" | "rar" | "7z" | "tar" => "Archives",
         _ => "Unknown",
     }
 }
 
-//Helper Method for Grouping Files Types
+//Grouping Files Types
 fn files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
     if let Some(types) = path.extension().and_then(|e| e.to_str()) {
         groups
@@ -90,7 +111,7 @@ fn files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
     }
 }
 
-//Helper Method for Creating all the needed Folders
+//Creating all the needed Folders
 fn create_folders(user_folder_location: &mut String) -> Result<(), Error> {
     println!(
         "Enter a folder path for these folders(Images, Videos, Music, Documents, Code, Archives, Unknown): "
@@ -119,7 +140,7 @@ fn create_folders(user_folder_location: &mut String) -> Result<(), Error> {
     Ok(())
 }
 
-//Helper method for moving all files into it own group
+//moving all files into it own group
 fn move_files(file_groups: &HashMap<String, Vec<PathBuf>>, path: &Path) {
     for (key, files) in file_groups {
         for file in files {
