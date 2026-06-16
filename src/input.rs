@@ -18,3 +18,14 @@ pub fn confirm() -> bool {
         return true;
     }
 }
+
+pub fn category_con() -> bool {
+    println!("Type N if done with category, Otherwise Type Anything: ");
+    let user_option = user_input();
+    let user_option = user_option.trim();
+    if user_option == "N" {
+        return false;
+    } else {
+        return true;
+    }
+}
