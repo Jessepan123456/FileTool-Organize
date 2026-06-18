@@ -1,24 +1,22 @@
 #[cfg(test)]
 mod tests {
-    use crate::files;
-    use crate::files::files_grouping;
-
+    use crate::files::{default_file_type, default_files_grouping};
     use std::collections::HashMap;
     use std::path::PathBuf;
 
     #[test]
     fn test_image_type() {
-        assert_eq!(files::file_type("png"), "Images");
+        assert_eq!(default_file_type("png"), "Images");
     }
 
     #[test]
     fn test_video_type() {
-        assert_eq!(files::file_type("mp4"), "Videos");
+        assert_eq!(default_file_type("mp4"), "Videos");
     }
 
     #[test]
     fn test_unknown_type() {
-        assert_eq!(files::file_type("abc"), "Unknown");
+        assert_eq!(default_file_type("abc"), "Unknown");
     }
 
     #[test]
@@ -27,7 +25,7 @@ mod tests {
 
         let path = PathBuf::from("cat.png");
 
-        files_grouping(path, &mut groups);
+        default_files_grouping(path, &mut groups);
 
         assert_eq!(groups.contains_key("Images"), true);
 
@@ -44,9 +42,9 @@ mod tests {
         let path2 = PathBuf::from("animal.png");
         let path3 = PathBuf::from("animal.mp4");
 
-        files_grouping(path1, &mut groups);
-        files_grouping(path2, &mut groups);
-        files_grouping(path3, &mut groups);
+        default_files_grouping(path1, &mut groups);
+        default_files_grouping(path2, &mut groups);
+        default_files_grouping(path3, &mut groups);
 
         assert_eq!(groups.contains_key("Images"), true);
         assert_eq!(groups.contains_key("Videos"), true);
@@ -55,4 +53,10 @@ mod tests {
 
         assert_eq!(images.len(), 2)
     }
+
+    //Custom file grouping
+
+    //Custom Category
+
+    //summary
 }

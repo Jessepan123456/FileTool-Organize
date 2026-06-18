@@ -1,9 +1,8 @@
-use std::path::{PathBuf, Path};
 use std::collections::HashMap;
 use std::fs::rename;
+use std::path::{Path, PathBuf};
 
-//determining File Types
-pub fn file_type(types: &str) -> &str {
+pub fn default_file_type(types: &str) -> &str {
     match types {
         "png" | "jpg" | "jpeg" | "gif" => "Images",
         "mp4" | "mov" | "avi" | "mkv" | "wmv" | "flv" => "Videos",
@@ -15,13 +14,30 @@ pub fn file_type(types: &str) -> &str {
     }
 }
 
-//Grouping Files Types
-pub fn files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
+pub fn default_files_grouping(path: PathBuf, groups: &mut HashMap<String, Vec<PathBuf>>) {
     if let Some(types) = path.extension().and_then(|e| e.to_str()) {
         groups
-            .entry(file_type(types).to_string())
+            .entry(default_file_type(types).to_string())
             .or_default()
             .push(path);
+    }
+}
+
+pub fn custom_files_grouping(
+    path: PathBuf,
+    groups: &mut HashMap<String, Vec<PathBuf>>,
+    custom: &HashMap<String, Vec<String>>,
+) {
+    if let Some(types) = path.extension().and_then(|e| e.to_str()) {
+        for (category, extensions) in custom {
+            if extensions.iter().any(|e| e == types) {
+                //Finds what matches
+                groups
+                    .entry(category.clone())
+                    .or_default()
+                    .push(path.clone());
+            }
+        }
     }
 }
 
