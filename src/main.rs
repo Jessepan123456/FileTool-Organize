@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use crate::folder::{create_folder, scan_folder};
 use crate::input::{category_con, custom_category_input, user_input};
-use crate::json::load;
+use crate::json::{load, search};
 
 mod files;
 mod folder;
@@ -50,9 +50,13 @@ fn main() -> Result<(), Error> {
             }
             "3" => {
                 load();
+                println!("Finish Rollback");
                 break;
             }
-            "4" => {}
+            "4" => {
+                search()?;
+                break;
+            }
             _ => {
                 println!("Invalid Input")
             }
@@ -62,13 +66,3 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-// --- Helper Method ---
-
-//Summary of files moved
-fn summary(file_groups: &HashMap<String, Vec<PathBuf>>, location: &Path) {
-    println!("Summary");
-    for (key, files) in file_groups {
-        println!("{}: {}", key, files.len())
-    }
-    println!("Move To: {}", &location.display());
-}

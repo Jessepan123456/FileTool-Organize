@@ -5,8 +5,8 @@ use std::path::PathBuf;
 
 use crate::Path;
 use crate::files::{custom_files_grouping, default_files_grouping, move_files};
-use crate::input::{user_input, confirm};
-use crate::summary;
+use crate::input::{confirm, user_input};
+use crate::json::summary;
 
 pub fn scan_folder(
     file_groups: &mut HashMap<String, Vec<PathBuf>>,
