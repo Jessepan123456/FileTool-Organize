@@ -1,6 +1,15 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::rename;
 use std::path::{Path, PathBuf};
+
+use crate::json::save;
+
+#[derive(Serialize, Deserialize)]
+pub struct MoveRecord {
+    pub from: PathBuf,
+    pub to: PathBuf,
+}
 
 pub fn default_file_type(types: &str) -> &str {
     match types {
@@ -43,6 +52,7 @@ pub fn custom_files_grouping(
 
 //moving all files into it own group
 pub fn move_files(file_groups: &HashMap<String, Vec<PathBuf>>, path: &Path) {
+    let mut record_history: Vec<MoveRecord> = Vec::new();
     for (key, files) in file_groups {
         for file in files {
             let file_name = match file.file_name() {
@@ -54,9 +64,17 @@ pub fn move_files(file_groups: &HashMap<String, Vec<PathBuf>>, path: &Path) {
             };
             let new_path = path.join(key).join(file_name);
 
+            let record = MoveRecord {
+                from: file.clone(),
+                to: new_path.clone(),
+            };
+
+            record_history.push(record);
+
             if let Err(e) = rename(file, new_path) {
                 println!("Failed to move file: {}", e)
             }
         }
     }
+    save(record_history);
 }

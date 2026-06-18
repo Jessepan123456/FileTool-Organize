@@ -4,16 +4,13 @@ use std::path::{Path, PathBuf};
 
 use crate::folder::{create_folder, scan_folder};
 use crate::input::{category_con, custom_category_input, user_input};
+use crate::json::load;
 
 mod files;
 mod folder;
 mod input;
+mod json;
 mod test;
-
-//Idea 2
-//Rollback
-//Save the folder before moving into a JSON and when you start the program it load it up if the user wants to rollback
-//Show where it going to rollback to but it only saves the previous action
 
 //Idea 3
 //Search
@@ -24,7 +21,7 @@ fn main() -> Result<(), Error> {
             "
         1. Default Folders\n
         2. Custom Folders\n
-        3. Rollback\n
+        3. Rollback(previous save)\n
         4. Search
         "
         );
@@ -51,7 +48,10 @@ fn main() -> Result<(), Error> {
                 create_folder(&mut file_groups, &mut folder_category, false)?;
                 break;
             }
-            "3" => {}
+            "3" => {
+                load();
+                break;
+            }
             "4" => {}
             _ => {
                 println!("Invalid Input")
