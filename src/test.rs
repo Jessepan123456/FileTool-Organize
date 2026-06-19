@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::files::{default_file_type, default_files_grouping};
+    use crate::functions::files::{custom_files_grouping, default_file_type, default_files_grouping};
     use std::collections::HashMap;
     use std::path::PathBuf;
 
@@ -54,9 +54,21 @@ mod tests {
         assert_eq!(images.len(), 2)
     }
 
-    //Custom file grouping
+    #[test]
+    fn custom_grouping_test() {
+        let mut groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
 
-    //Custom Category
+        let mut custom: HashMap<String, Vec<String>> = HashMap::new();
+        custom.insert(
+            "Images".to_string(),
+            vec!["png".to_string(), "jpg".to_string()],
+        );
 
-    //summary
+        let path = PathBuf::from("cat.png");
+
+        custom_files_grouping(path.clone(), &mut groups, &custom);
+
+        assert!(groups.contains_key("Images"));
+        assert_eq!(groups["Images"][0], path);
+    }
 }

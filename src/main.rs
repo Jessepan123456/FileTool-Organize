@@ -2,19 +2,13 @@ use std::collections::HashMap;
 use std::io::{Error, stdin};
 use std::path::{Path, PathBuf};
 
-use crate::folder::{create_folder, scan_folder};
-use crate::input::{category_con, custom_category_input, user_input};
-use crate::json::{load, search};
+use crate::functions::folder::{create_folder, scan_folder};
+use crate::functions::input::{category_con, custom_category_input, user_input};
+use crate::functions::json::{load, search};
 
-mod files;
-mod folder;
-mod input;
-mod json;
+mod functions;
 mod test;
 
-//Idea 3
-//Search
-//Allows the user to search category in there folder on there pc based on extension in a specific folder location
 fn main() -> Result<(), Error> {
     loop {
         println!(
@@ -65,4 +59,3 @@ fn main() -> Result<(), Error> {
 
     Ok(())
 }
-

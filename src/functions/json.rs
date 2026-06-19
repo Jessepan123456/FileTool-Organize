@@ -4,8 +4,8 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 use crate::Error;
-use crate::files::MoveRecord;
-use crate::input::{confirm, user_input};
+use crate::functions::files::MoveRecord;
+use crate::functions::input::{confirm, user_input};
 
 //Summary of files moved
 pub fn summary(file_groups: &HashMap<String, Vec<PathBuf>>, location: &Path) {
